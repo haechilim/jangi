@@ -99,7 +99,7 @@ public class JangiBoard extends Panel implements MouseListener {
         graphics.drawLine((int)(marginX + cellWidth*5), (int)(getHeight() - marginY - cellHeight*2),
                 (int)(marginX + cellWidth*3), (int)(getHeight() - marginY));
 
-        graphics.drawRect(marginX - 1, marginY - 1, getWidth() - marginX*2 + 1, getHeight() - marginY*2 + 2);
+        graphics.drawRect(marginX - 1, marginY - 1, getWidth() - marginX*2, getHeight() - marginY*2 + 2);
     }
 
     private void drawSelected(Graphics graphics, int posX, int posY, Cell cell) {

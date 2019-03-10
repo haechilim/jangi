@@ -1,10 +1,13 @@
 package com.haechi.jangi.core;
 
 import com.haechi.jangi.display.JangiFrame;
+import sun.misc.CEFormatException;
 
 public class Board {
     private Cell[][] cells;
     private JangiFrame jangiFrame;
+    private Cell selectedCell;
+    private boolean redTurn = true;
 
     public void init() {
         makeCells();
@@ -67,7 +70,75 @@ public class Board {
         return cells;
     }
 
+    private void selectedCell(Cell cell) {
+        if(cell.getPiece() != null && cell.getPiece().isRed() == redTurn) {
+            cell.setSelected(true);
+            selectedCell = cell;
+        }
+    }
+
+    private void markMovable(Cell cell, int posX, int posY) {
+        if(cell.getPiece() == null || cell.getPiece().isRed() != redTurn) return;
+
+        switch (cell.getPiece().getType()) {
+            case Piece.PRIVATE: markMovablePrivate(posX, posY);
+        }
+    }
+
+    private void markMovablePrivate(int posX, int posY) {
+        int offset = redTurn ? 1 : -1;
+
+        markMovableCell(posX, posY + offset);
+        markMovableCell(posX + 1, posY);
+        markMovableCell(posX - 1, posY);
+    }
+
+    private void markMovableCell(int posX, int posY) {
+        if(isMovableCell(posX, posY)) cells[posX][posY].setMovable(true);
+    }
+
+    private boolean isMovableCell(int posX, int posY) {
+        if(validIndex(posX, posY) && cells[posX][posY].getPiece() == null) {
+            return true;
+        }
+        else if(validIndex(posX, posY) && cells[posX][posY].getPiece() != null && cells[posX][posY].getPiece().isRed() != redTurn) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean validIndex(int posX, int posY) {
+        return (posX >= 0 && posX < 9) && (posY >= 0 && posY < 10);
+    }
+
+    private boolean validRoyalPalace(boolean red, int posX, int posY) {
+        if(red) return posX
+    }
+
+    private void clearSelectedCell() {
+        for(int x = 0; x < 9; x++) {
+            for(int y = 0; y < 10; y++) {
+                cells[x][y].setSelected(false);
+            }
+        }
+    }
+
+    private void clearMovableCells() {
+        for(int x = 0; x < 9; x++) {
+            for(int y = 0; y < 10; y++) {
+                cells[x][y].setMovable(false);
+            }
+        }
+    }
+
     public void cellClicked(int posX, int posY) {
+        Cell cell = cells[posX][posY];
+
+        clearSelectedCell();
+        clearMovableCells();
+        selectedCell(cell);
+        markMovable(cell, posX, posY);
         jangiFrame.redraw();
     }
 }
