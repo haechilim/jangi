@@ -1,7 +1,6 @@
 package com.haechi.jangi.core;
 
 import com.haechi.jangi.display.JangiFrame;
-import sun.misc.CEFormatException;
 
 public class Board {
     private Cell[][] cells;
@@ -64,6 +63,8 @@ public class Board {
         cells[6][9].setPiece(new Piece(false, Piece.HORSE));
         cells[7][9].setPiece(new Piece(false, Piece.ELEPHANT));
         cells[8][9].setPiece(new Piece(false, Piece.TRAIN));
+
+        cells[4][5].setPiece(new Piece(true, Piece.HORSE));
     }
 
     public Cell[][] getCells() {
@@ -82,6 +83,19 @@ public class Board {
 
         switch (cell.getPiece().getType()) {
             case Piece.PRIVATE: markMovablePrivate(posX, posY);
+            break;
+
+            case Piece.KING: markMovableKing(posX, posY);
+            break;
+
+            case Piece.SECRETARY: markMovableSecretary(posX, posY);
+            break;
+
+            case Piece.HORSE: markMovableHorse(posX, posY);
+            break;
+
+            case Piece.ELEPHANT: markMovableElephant(posX, posY);
+            break;
         }
     }
 
@@ -93,14 +107,66 @@ public class Board {
         markMovableCell(posX - 1, posY);
     }
 
+    private void markMovableKing(int posX, int posY) {
+        if(validIndexRoyalPalace(redTurn, posX, posY - 1)) markMovableCell(posX, posY - 1);
+        if(validIndexRoyalPalace(redTurn, posX + 1, posY - 1)) markMovableCell(posX + 1, posY - 1);
+        if(validIndexRoyalPalace(redTurn, posX + 1, posY)) markMovableCell(posX + 1, posY);
+        if(validIndexRoyalPalace(redTurn, posX + 1, posY + 1)) markMovableCell(posX + 1, posY + 1);
+        if(validIndexRoyalPalace(redTurn, posX, posY + 1)) markMovableCell(posX, posY + 1);
+        if(validIndexRoyalPalace(redTurn, posX - 1, posY + 1)) markMovableCell(posX - 1, posY + 1);
+        if(validIndexRoyalPalace(redTurn, posX - 1, posY)) markMovableCell(posX - 1, posY);
+        if(validIndexRoyalPalace(redTurn, posX - 1, posY - 1)) markMovableCell(posX - 1, posY - 1);
+    }
+
+    private void markMovableSecretary(int posX, int posY) {
+        markMovableKing(posX, posY);
+    }
+
+    private void markMovableHorse(int posX, int posY) {
+        if(isProgressCell(posX, posY - 1)) {
+            markMovableCell(posX + 1, posY - 2);
+            markMovableCell(posX - 1, posY - 2);
+        }
+        if(isProgressCell(posX + 1, posY)) {
+            markMovableCell(posX + 2, posY - 1);
+            markMovableCell(posX + 2, posY + 1);
+        }
+        if(isProgressCell(posX, posY + 1)) {
+            markMovableCell(posX + 1,posY + 2);
+            markMovableCell(posX - 1,posY + 2);
+        }
+        if(isProgressCell(posX - 1, posY)) {
+            markMovableCell(posX - 2, posY - 1);
+            markMovableCell(posX - 2, posY + 1);
+        }
+    }
+
+    private void markMovableElephant(int posX, int posY) {
+        if(isProgressCell(posX, posY - 1)) {
+            if(isProgressCell(posX + 1, posY - 2)) markMovableCell(posX + 2, posY - 3);
+            if(isProgressCell(posX - 1, posY - 2)) markMovableCell(posX - 2, posY - 3);
+        }
+        if(isProgressCell(posX + 1, posY)) {
+            if(isProgressCell(posX + 2, posY - 1)) markMovableCell(posX + 3, posY - 2);
+            if(isProgressCell(posX + 2, posY + 1)) markMovableCell(posX + 3, posY + 2);
+        }
+        if(isProgressCell(posX, posY + 1)) {
+            if(isProgressCell(posX + 1,posY + 2)) markMovableCell(posX + 2, posY + 3);
+            if(isProgressCell(posX - 1,posY + 2)) markMovableCell(posX - 2, posY + 3);
+        }
+        if(isProgressCell(posX - 1, posY)) {
+            if(isProgressCell(posX - 2, posY - 1)) markMovableCell(posX - 3, posY - 2);
+            if(isProgressCell(posX - 2, posY + 1)) markMovableCell(posX - 3, posY + 2);
+        }
+    }
+
     private void markMovableCell(int posX, int posY) {
         if(isMovableCell(posX, posY)) cells[posX][posY].setMovable(true);
     }
 
     private boolean isMovableCell(int posX, int posY) {
-        if(validIndex(posX, posY) && cells[posX][posY].getPiece() == null) {
-            return true;
-        }
+        if(validIndex(posX, posY) && cells[posX][posY].getPiece() == null) return true;
+
         else if(validIndex(posX, posY) && cells[posX][posY].getPiece() != null && cells[posX][posY].getPiece().isRed() != redTurn) {
             return true;
         }
@@ -108,12 +174,19 @@ public class Board {
         return false;
     }
 
+    private boolean isProgressCell(int posX, int posY) {
+        return validIndex(posX, posY) && cells[posX][posY].getPiece() == null;
+    }
+
     private boolean validIndex(int posX, int posY) {
         return (posX >= 0 && posX < 9) && (posY >= 0 && posY < 10);
     }
 
-    private boolean validRoyalPalace(boolean red, int posX, int posY) {
-        if(red) return posX
+    private boolean validIndexRoyalPalace(boolean red, int posX, int posY) {
+        if(!validIndex(posX, posY)) return false;
+
+        if(red) return (posX >= 3 && posX <= 5) && (posY >= 0 && posY <= 3);
+        else return (posX >= 3 && posX <= 5) && (posY >= 7 && posY <= 9);
     }
 
     private void clearSelectedCell() {
