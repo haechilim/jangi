@@ -6,7 +6,12 @@ public class Board {
     private Cell[][] cells;
     private JangiFrame jangiFrame;
     private Cell selectedCell;
-    private boolean redTurn = true;
+    private boolean redTurn = false;
+    private final static int UP = 0;
+    private final static int RIGHT = 1;
+    private final static int DOWN = 2;
+    private final static int LEFT = 3;
+
 
     public void init() {
         makeCells();
@@ -64,7 +69,10 @@ public class Board {
         cells[7][9].setPiece(new Piece(false, Piece.ELEPHANT));
         cells[8][9].setPiece(new Piece(false, Piece.TRAIN));
 
-        cells[4][5].setPiece(new Piece(true, Piece.HORSE));
+        cells[5][4].setPiece(new Piece(false, Piece.TRAIN));
+        cells[4][5].setPiece(new Piece(true, Piece.ELEPHANT));
+        cells[2][5].setPiece(new Piece(false, Piece.CANNON));
+        cells[7][5].setPiece(new Piece(true, Piece.CANNON));
     }
 
     public Cell[][] getCells() {
@@ -95,6 +103,12 @@ public class Board {
             break;
 
             case Piece.ELEPHANT: markMovableElephant(posX, posY);
+            break;
+
+            case Piece.TRAIN: markMovableTrain(posX, posY);
+            break;
+
+            case Piece.CANNON: markMovableCannon(posX, posY);
             break;
         }
     }
@@ -160,18 +174,102 @@ public class Board {
         }
     }
 
-    private void markMovableCell(int posX, int posY) {
-        if(isMovableCell(posX, posY)) cells[posX][posY].setMovable(true);
+    private void markMovableTrain(int posX, int posY) {
+        //  markMovableCannon() 함수처럼
+        //  하위 함수를 만든뒤 UP, RIGHT, DOWN, LEFT로 호출하면
+        //  더 읽기 쉬운 코다가 될듯
+        for(int i = 1; ; i++) {
+            if(!markMovableCell(posX + i, posY)) break;
+            if(isHoldableCell(posX + i, posY)) break;
+        }
+        for(int i = 1; ; i++) {
+            if(!markMovableCell(posX - i, posY)) break;
+            if(isHoldableCell(posX - i, posY)) break;
+        }
+        for(int i = 1; ; i++) {
+            if(!markMovableCell(posX, posY + i)) break;
+            if(isHoldableCell(posX, posY + i)) break;
+        }
+        for(int i = 1; ; i++) {
+            if(!markMovableCell(posX, posY - i)) break;
+            if(isHoldableCell(posX, posY - i)) break;
+        }
+    }
+
+    private void markMovableCannon(int posX, int posY) {
+        markMovableCannon(UP, posX, posY);
+        markMovableCannon(RIGHT, posX, posY);
+        markMovableCannon(DOWN, posX, posY);
+        markMovableCannon(LEFT, posX, posY);
+    }
+
+    private void markMovableCannon(int direction, int posX, int posY) {
+        int number = 0;
+
+        for(int i = 1; ; i++) {
+            switch(direction) {
+                case UP:
+                    number = posY + i;
+                    posY = number;
+                    break;
+
+                case RIGHT:
+                    number = posX + i;
+                    posX = number;
+                    break;
+
+                case DOWN:
+                    number = posY - i;
+                    posY = number;
+                    break;
+
+                case LEFT:
+                    number = posX - i;
+                    posX = number;
+                    break;
+            }
+
+            if(!validIndex(posX, posY)) break;
+            if(cells[posX][posY].getPiece() == null) continue;
+            if(cells[posX][posY].getPiece() != null && cells[posX][posY].getPiece().getType() == Piece.CANNON) break;
+            if(cells[posX][posY].getPiece() != null) {
+                if (direction == UP || direction == DOWN) {
+                    for (int y = number + 1; ; y++) {
+                        if (!validIndex(posX, y)) break;
+                        if (!markMovableCell(posX, y)) break;
+                        if (isHoldableCell(posX, y)) break;
+                    }
+
+                    break;
+                }
+                else if (direction == RIGHT || direction == LEFT) {
+                    for (int x = number + 1; ; x++) {
+                        if (!validIndex(x, posY)) break;
+                        if (!markMovableCell(x, posY)) break;
+                        if (isHoldableCell(x, posY)) break;
+                    }
+
+                    break;
+                }
+            }
+        }
+    }
+
+    private boolean markMovableCell(int posX, int posY) {
+        if(!isMovableCell(posX, posY)) return false;
+
+        cells[posX][posY].setMovable(true);
+        return true;
     }
 
     private boolean isMovableCell(int posX, int posY) {
         if(validIndex(posX, posY) && cells[posX][posY].getPiece() == null) return true;
 
-        else if(validIndex(posX, posY) && cells[posX][posY].getPiece() != null && cells[posX][posY].getPiece().isRed() != redTurn) {
-            return true;
-        }
+        return isHoldableCell(posX, posY);
+    }
 
-        return false;
+    private boolean isHoldableCell(int posX, int posY) {
+        return validIndex(posX, posY) && cells[posX][posY].getPiece() != null && cells[posX][posY].getPiece().isRed() != redTurn;
     }
 
     private boolean isProgressCell(int posX, int posY) {
