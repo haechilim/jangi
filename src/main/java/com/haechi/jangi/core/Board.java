@@ -3,15 +3,15 @@ package com.haechi.jangi.core;
 import com.haechi.jangi.display.JangiFrame;
 
 public class Board {
+    private static final int LEFT = 1;
+    private static final int RIGHT = 2;
+    private static final int TOP = 3;
+    private static final int BOTTOM = 4;
+
     private Cell[][] cells;
     private JangiFrame jangiFrame;
     private Cell selectedCell;
     private boolean redTurn = false;
-    private final static int UP = 0;
-    private final static int RIGHT = 1;
-    private final static int DOWN = 2;
-    private final static int LEFT = 3;
-
 
     public void init() {
         makeCells();
@@ -68,68 +68,68 @@ public class Board {
         cells[6][9].setPiece(new Piece(false, Piece.HORSE));
         cells[7][9].setPiece(new Piece(false, Piece.ELEPHANT));
         cells[8][9].setPiece(new Piece(false, Piece.TRAIN));
-
-        cells[5][4].setPiece(new Piece(false, Piece.TRAIN));
-        cells[4][5].setPiece(new Piece(true, Piece.ELEPHANT));
-        cells[2][5].setPiece(new Piece(false, Piece.CANNON));
-        cells[7][5].setPiece(new Piece(true, Piece.CANNON));
     }
 
     public Cell[][] getCells() {
         return cells;
     }
 
-    private void selectedCell(Cell cell) {
-        if(cell.getPiece() != null && cell.getPiece().isRed() == redTurn) {
+    private void selectCell(Cell cell) {
+        if(cell.existsPiece() && cell.getPiece().isRed() == redTurn) {
             cell.setSelected(true);
             selectedCell = cell;
         }
     }
 
-    private void markMovable(Cell cell, int posX, int posY) {
-        if(cell.getPiece() == null || cell.getPiece().isRed() != redTurn) return;
+    private void markMovableCell(Cell cell, int posX, int posY) {
+        if(cell.isEmpty() || cell.getPiece().isRed() != redTurn) return;
 
         switch (cell.getPiece().getType()) {
-            case Piece.PRIVATE: markMovablePrivate(posX, posY);
-            break;
+            case Piece.PRIVATE:
+                markMovablePrivate(posX, posY);
+                break;
 
-            case Piece.KING: markMovableKing(posX, posY);
-            break;
+            case Piece.KING:
+                markMovableKing(posX, posY);
+                break;
 
-            case Piece.SECRETARY: markMovableSecretary(posX, posY);
-            break;
+            case Piece.SECRETARY:
+                markMovableSecretary(posX, posY);
+                break;
 
-            case Piece.HORSE: markMovableHorse(posX, posY);
-            break;
+            case Piece.HORSE:
+                markMovableHorse(posX, posY);
+                break;
 
-            case Piece.ELEPHANT: markMovableElephant(posX, posY);
-            break;
+            case Piece.ELEPHANT:
+                markMovableElephant(posX, posY);
+                break;
 
-            case Piece.TRAIN: markMovableTrain(posX, posY);
-            break;
+            case Piece.TRAIN:
+                markMovableTrain(posX, posY);
+                break;
 
-            case Piece.CANNON: markMovableCannon(posX, posY);
-            break;
+            case Piece.CANNON:
+                markMovableCannon(posX, posY);
+                break;
         }
     }
 
     private void markMovablePrivate(int posX, int posY) {
-        int offset = redTurn ? 1 : -1;
-
-        markMovableCell(posX, posY + offset);
+        markMovableCell(posX, posY + (redTurn ? 1 : -1));
         markMovableCell(posX + 1, posY);
         markMovableCell(posX - 1, posY);
     }
 
     private void markMovableKing(int posX, int posY) {
-        if(validIndexRoyalPalace(redTurn, posX, posY - 1)) markMovableCell(posX, posY - 1);
-        if(validIndexRoyalPalace(redTurn, posX + 1, posY - 1)) markMovableCell(posX + 1, posY - 1);
-        if(validIndexRoyalPalace(redTurn, posX + 1, posY)) markMovableCell(posX + 1, posY);
-        if(validIndexRoyalPalace(redTurn, posX + 1, posY + 1)) markMovableCell(posX + 1, posY + 1);
-        if(validIndexRoyalPalace(redTurn, posX, posY + 1)) markMovableCell(posX, posY + 1);
-        if(validIndexRoyalPalace(redTurn, posX - 1, posY + 1)) markMovableCell(posX - 1, posY + 1);
-        if(validIndexRoyalPalace(redTurn, posX - 1, posY)) markMovableCell(posX - 1, posY);
-        if(validIndexRoyalPalace(redTurn, posX - 1, posY - 1)) markMovableCell(posX - 1, posY - 1);
+        if(isIndexInsideRoyalPalace(posX, posY - 1)) markMovableCell(posX, posY - 1);
+        if(isIndexInsideRoyalPalace(posX + 1, posY - 1)) markMovableCell(posX + 1, posY - 1);
+        if(isIndexInsideRoyalPalace(posX + 1, posY)) markMovableCell(posX + 1, posY);
+        if(isIndexInsideRoyalPalace(posX + 1, posY + 1)) markMovableCell(posX + 1, posY + 1);
+        if(isIndexInsideRoyalPalace(posX, posY + 1)) markMovableCell(posX, posY + 1);
+        if(isIndexInsideRoyalPalace(posX - 1, posY + 1)) markMovableCell(posX - 1, posY + 1);
+        if(isIndexInsideRoyalPalace(posX - 1, posY)) markMovableCell(posX - 1, posY);
+        if(isIndexInsideRoyalPalace(posX - 1, posY - 1)) markMovableCell(posX - 1, posY - 1);
     }
 
     private void markMovableSecretary(int posX, int posY) {
@@ -137,157 +137,124 @@ public class Board {
     }
 
     private void markMovableHorse(int posX, int posY) {
-        if(isProgressCell(posX, posY - 1)) {
+        if(isEmptyCell(posX, posY - 1)) {
             markMovableCell(posX + 1, posY - 2);
             markMovableCell(posX - 1, posY - 2);
         }
-        if(isProgressCell(posX + 1, posY)) {
+        if(isEmptyCell(posX + 1, posY)) {
             markMovableCell(posX + 2, posY - 1);
             markMovableCell(posX + 2, posY + 1);
         }
-        if(isProgressCell(posX, posY + 1)) {
+        if(isEmptyCell(posX, posY + 1)) {
             markMovableCell(posX + 1,posY + 2);
             markMovableCell(posX - 1,posY + 2);
         }
-        if(isProgressCell(posX - 1, posY)) {
+        if(isEmptyCell(posX - 1, posY)) {
             markMovableCell(posX - 2, posY - 1);
             markMovableCell(posX - 2, posY + 1);
         }
     }
 
     private void markMovableElephant(int posX, int posY) {
-        if(isProgressCell(posX, posY - 1)) {
-            if(isProgressCell(posX + 1, posY - 2)) markMovableCell(posX + 2, posY - 3);
-            if(isProgressCell(posX - 1, posY - 2)) markMovableCell(posX - 2, posY - 3);
+        if(isEmptyCell(posX, posY - 1)) {
+            if(isEmptyCell(posX + 1, posY - 2)) markMovableCell(posX + 2, posY - 3);
+            if(isEmptyCell(posX - 1, posY - 2)) markMovableCell(posX - 2, posY - 3);
         }
-        if(isProgressCell(posX + 1, posY)) {
-            if(isProgressCell(posX + 2, posY - 1)) markMovableCell(posX + 3, posY - 2);
-            if(isProgressCell(posX + 2, posY + 1)) markMovableCell(posX + 3, posY + 2);
+        if(isEmptyCell(posX + 1, posY)) {
+            if(isEmptyCell(posX + 2, posY - 1)) markMovableCell(posX + 3, posY - 2);
+            if(isEmptyCell(posX + 2, posY + 1)) markMovableCell(posX + 3, posY + 2);
         }
-        if(isProgressCell(posX, posY + 1)) {
-            if(isProgressCell(posX + 1,posY + 2)) markMovableCell(posX + 2, posY + 3);
-            if(isProgressCell(posX - 1,posY + 2)) markMovableCell(posX - 2, posY + 3);
+        if(isEmptyCell(posX, posY + 1)) {
+            if(isEmptyCell(posX + 1,posY + 2)) markMovableCell(posX + 2, posY + 3);
+            if(isEmptyCell(posX - 1,posY + 2)) markMovableCell(posX - 2, posY + 3);
         }
-        if(isProgressCell(posX - 1, posY)) {
-            if(isProgressCell(posX - 2, posY - 1)) markMovableCell(posX - 3, posY - 2);
-            if(isProgressCell(posX - 2, posY + 1)) markMovableCell(posX - 3, posY + 2);
+        if(isEmptyCell(posX - 1, posY)) {
+            if(isEmptyCell(posX - 2, posY - 1)) markMovableCell(posX - 3, posY - 2);
+            if(isEmptyCell(posX - 2, posY + 1)) markMovableCell(posX - 3, posY + 2);
         }
     }
 
     private void markMovableTrain(int posX, int posY) {
-        //  markMovableCannon() 함수처럼
-        //  하위 함수를 만든뒤 UP, RIGHT, DOWN, LEFT로 호출하면
-        //  더 읽기 쉬운 코다가 될듯
         for(int i = 1; ; i++) {
             if(!markMovableCell(posX + i, posY)) break;
-            if(isHoldableCell(posX + i, posY)) break;
+            if(!isEmptyCell(posX + i, posY)) break;
         }
+
         for(int i = 1; ; i++) {
             if(!markMovableCell(posX - i, posY)) break;
-            if(isHoldableCell(posX - i, posY)) break;
+            if(!isEmptyCell(posX - i, posY)) break;
         }
+
         for(int i = 1; ; i++) {
             if(!markMovableCell(posX, posY + i)) break;
-            if(isHoldableCell(posX, posY + i)) break;
+            if(!isEmptyCell(posX, posY + i)) break;
         }
+
         for(int i = 1; ; i++) {
             if(!markMovableCell(posX, posY - i)) break;
-            if(isHoldableCell(posX, posY - i)) break;
+            if(!isEmptyCell(posX, posY - i)) break;
         }
     }
 
     private void markMovableCannon(int posX, int posY) {
-        markMovableCannon(UP, posX, posY);
-        markMovableCannon(RIGHT, posX, posY);
-        markMovableCannon(DOWN, posX, posY);
-        markMovableCannon(LEFT, posX, posY);
+        markMovableCannon(posX, posY, LEFT);
+        markMovableCannon(posX, posY, RIGHT);
+        markMovableCannon(posX, posY, TOP);
+        markMovableCannon(posX, posY, BOTTOM);
     }
 
-    private void markMovableCannon(int direction, int posX, int posY) {
-        int number = 0;
+    private void markMovableCannon(int posX, int posY, int direction) {
+        boolean found = false;
 
-        for(int i = 1; ; i++) {
-            switch(direction) {
-                case UP:
-                    number = posY + i;
-                    posY = number;
-                    break;
+        while(true) {
+            if(direction == LEFT) posX--;
+            else if(direction == RIGHT) posX++;
+            else if(direction == TOP) posY--;
+            else if(direction == BOTTOM) posY++;
+            else break;
 
-                case RIGHT:
-                    number = posX + i;
-                    posX = number;
-                    break;
+            if(!isValidIndex(posX, posY)) break;
 
-                case DOWN:
-                    number = posY - i;
-                    posY = number;
-                    break;
+            Cell cell = cells[posX][posY];
 
-                case LEFT:
-                    number = posX - i;
-                    posX = number;
-                    break;
+            if(cell.existsPiece() && cell.getPiece().getType() == Piece.CANNON) break;
+
+            if(found) {
+                markMovableCell(posX, posY);
+                if(cell.existsPiece()) break;
             }
-
-            if(!validIndex(posX, posY)) break;
-            if(cells[posX][posY].getPiece() == null) continue;
-            if(cells[posX][posY].getPiece() != null && cells[posX][posY].getPiece().getType() == Piece.CANNON) break;
-            if(cells[posX][posY].getPiece() != null) {
-                if (direction == UP || direction == DOWN) {
-                    for (int y = number + 1; ; y++) {
-                        if (!validIndex(posX, y)) break;
-                        if (!markMovableCell(posX, y)) break;
-                        if (isHoldableCell(posX, y)) break;
-                    }
-
-                    break;
-                }
-                else if (direction == RIGHT || direction == LEFT) {
-                    for (int x = number + 1; ; x++) {
-                        if (!validIndex(x, posY)) break;
-                        if (!markMovableCell(x, posY)) break;
-                        if (isHoldableCell(x, posY)) break;
-                    }
-
-                    break;
-                }
-            }
+            else if(cell.existsPiece()) found = true;
         }
     }
 
     private boolean markMovableCell(int posX, int posY) {
         if(!isMovableCell(posX, posY)) return false;
-
         cells[posX][posY].setMovable(true);
         return true;
     }
 
     private boolean isMovableCell(int posX, int posY) {
-        if(validIndex(posX, posY) && cells[posX][posY].getPiece() == null) return true;
+        if(!isValidIndex(posX, posY)) return false;
 
-        return isHoldableCell(posX, posY);
+        return cells[posX][posY].isEmpty() || cells[posX][posY].getPiece().isRed() != redTurn;
     }
 
-    private boolean isHoldableCell(int posX, int posY) {
-        return validIndex(posX, posY) && cells[posX][posY].getPiece() != null && cells[posX][posY].getPiece().isRed() != redTurn;
+    private boolean isEmptyCell(int posX, int posY) {
+        return isValidIndex(posX, posY) && cells[posX][posY].isEmpty();
     }
 
-    private boolean isProgressCell(int posX, int posY) {
-        return validIndex(posX, posY) && cells[posX][posY].getPiece() == null;
-    }
-
-    private boolean validIndex(int posX, int posY) {
+    private boolean isValidIndex(int posX, int posY) {
         return (posX >= 0 && posX < 9) && (posY >= 0 && posY < 10);
     }
 
-    private boolean validIndexRoyalPalace(boolean red, int posX, int posY) {
-        if(!validIndex(posX, posY)) return false;
+    private boolean isIndexInsideRoyalPalace(int posX, int posY) {
+        if(!isValidIndex(posX, posY)) return false;
 
-        if(red) return (posX >= 3 && posX <= 5) && (posY >= 0 && posY <= 3);
+        if(redTurn) return (posX >= 3 && posX <= 5) && (posY >= 0 && posY <= 3);
         else return (posX >= 3 && posX <= 5) && (posY >= 7 && posY <= 9);
     }
 
-    private void clearSelectedCell() {
+    private void clearSelectedCells() {
         for(int x = 0; x < 9; x++) {
             for(int y = 0; y < 10; y++) {
                 cells[x][y].setSelected(false);
@@ -303,13 +270,26 @@ public class Board {
         }
     }
 
+    private boolean move(int posX, int posY) {
+        if(cells[posX][posY].isMovable()) {
+            cells[posX][posY].setPiece(selectedCell.getPiece());
+            selectedCell.setPiece(null);
+            redTurn = !redTurn;
+            jangiFrame.redraw();
+            return true;
+        }
+
+        return false;
+    }
+
     public void cellClicked(int posX, int posY) {
         Cell cell = cells[posX][posY];
 
-        clearSelectedCell();
+        move(posX, posY);
+        clearSelectedCells();
         clearMovableCells();
-        selectedCell(cell);
-        markMovable(cell, posX, posY);
+        selectCell(cell);
+        markMovableCell(cell, posX, posY);
         jangiFrame.redraw();
     }
 }

@@ -28,4 +28,12 @@ public class Cell {
     public void setPiece(Piece piece) {
         this.piece = piece;
     }
+
+    public boolean existsPiece() {
+        return piece != null;
+    }
+
+    public boolean isEmpty() {
+        return piece == null;
+    }
 }
