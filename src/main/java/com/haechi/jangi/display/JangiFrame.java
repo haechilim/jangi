@@ -22,9 +22,9 @@ public class JangiFrame extends JFrame implements ActionListener {
     }
 
     public void init() {
-        setUndecorated(true);
-        setExtendedState(JFrame.MAXIMIZED_BOTH);
-        //setBounds(0, 0, 1980, 900);
+        //setUndecorated(true);
+        //setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setBounds(0, 0, 1000, 750);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         getContentPane().setBackground(new Color(49, 46, 43));
@@ -41,19 +41,18 @@ public class JangiFrame extends JFrame implements ActionListener {
 
     private void initDimensions() {
         Dimension screenDim = Toolkit.getDefaultToolkit().getScreenSize();
-        frameDim = new Dimension(screenDim.width, screenDim.height - 60);
-
-        //frameDim.height -= 300;
+        //frameDim = new Dimension(screenDim.width, screenDim.height - 60);
+        frameDim = new Dimension(getWidth(), getHeight());
 
         boardDim = new Dimension();
-        boardDim.height = frameDim.height - 100;
+        boardDim.height = frameDim.height - 80;
         boardDim.width = boardDim.height;
     }
 
     private void makeComponents() {
         jangiBoard = new JangiBoard(board);
         jangiBoard.setBounds(frameDim.width/2 - boardDim.width/2,
-                frameDim.height/2 - boardDim.height/2,
+                frameDim.height/2 - boardDim.height/2 - 20,
                 boardDim.width, boardDim.height);
         jangiBoard.init();
         add(jangiBoard);
@@ -61,7 +60,7 @@ public class JangiFrame extends JFrame implements ActionListener {
         exit = new Button("Exit");
         exit.setBounds(frameDim.width - 100, 10, 90, 60);
         exit.addActionListener(this);
-        add(exit);
+        //add(exit);
     }
 
     @Override

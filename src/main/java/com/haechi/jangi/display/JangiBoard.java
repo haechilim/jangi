@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class JangiBoard extends Panel implements MouseListener {
-    private static final String classpath = JangiBoard.class.getResource("/").getPath();
     private static final Color colorSelected = new Color(0, 0, 0);
     private static final Color colorMovable = new Color(50, 50,50);
     private static final Color colorLine = new Color(0, 0, 0);
@@ -72,7 +71,7 @@ public class JangiBoard extends Panel implements MouseListener {
         if(background != null) return;
 
         background = createImage(getWidth(), getHeight());
-        Image back = Util.loadImage(String.format("%s%s", classpath, "woodpattern.jpg"));
+        Image back = Util.loadImage(getClass().getClassLoader().getResource("woodpattern.jpg"));
 
         Graphics graphics = background.getGraphics();
         graphics.drawImage(back, 0, 0, getWidth(), getHeight(), null);
@@ -135,7 +134,8 @@ public class JangiBoard extends Panel implements MouseListener {
         Image image = imagePiecies.get(key);
 
         if(image == null) {
-            image = JangiPiece.getPiece(red, type);
+            String path = JangiPiece.getPiecePath(red, type);
+            image = Util.loadImage(getClass().getClassLoader().getResource(path));
             imagePiecies.put(key, image);
         }
 
