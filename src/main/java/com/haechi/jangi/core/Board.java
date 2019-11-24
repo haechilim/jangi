@@ -119,6 +119,19 @@ public class Board {
         markMovableCell(posX, posY + (redTurn ? 1 : -1));
         markMovableCell(posX + 1, posY);
         markMovableCell(posX - 1, posY);
+
+        if(posX == 3 && posY == 2) markMovableCell(4, 1);
+        else if(posX == 5 && posY == 2) markMovableCell(4, 1);
+        else if(posX == 4 && posY == 1) {
+            markMovableCell(3, 0);
+            markMovableCell(5, 0);
+        }
+        else if(posX == 3 && posY == 7) markMovableCell(4, 8);
+        else if(posX == 5 && posY == 7) markMovableCell(4, 8);
+        else if(posX == 4 && posY == 8) {
+            markMovableCell(3, 9);
+            markMovableCell(5, 9);
+        }
     }
 
     private void markMovableKing(int posX, int posY) {
@@ -250,7 +263,7 @@ public class Board {
     private boolean isIndexInsideRoyalPalace(int posX, int posY) {
         if(!isValidIndex(posX, posY)) return false;
 
-        if(redTurn) return (posX >= 3 && posX <= 5) && (posY >= 0 && posY <= 3);
+        if(redTurn) return (posX >= 3 && posX <= 5) && (posY >= 0 && posY <= 2);
         else return (posX >= 3 && posX <= 5) && (posY >= 7 && posY <= 9);
     }
 
